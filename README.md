@@ -1,26 +1,34 @@
-# ULan – Guide (English)
+# ULan – LAN Party Intranet (English Guide)
 
-ULan is a local intranet for LAN parties. It runs on one Windows PC (the **host**); everyone else opens it in a
-browser over the LAN (phone or PC). Features: live scoreboard, schedule, hotdog counter, info text (Wi-Fi password,
-server IPs, rules), accounts with Steam links, and sound / name announcements that play **on the host PC**.
-The German guide is in `ANLEITUNG.md`.
+ULan is a small web app for running a LAN party from one Windows PC (the **host**). Players open it in a browser on
+that PC or on another device on the same network. It includes a scoreboard with rounds, a configurable counter, a
+schedule, shared info, player accounts with Steam links, and sound/name announcements played on the host PC. A
+separate read-only leaderboard can be shared without giving access to the main app. The German guide is in
+`ANLEITUNG.md`.
+
+## Counter, themes, schedule and score timing
+
+- Set `COUNTER_ITEM` near the top of `server.py` to rename the counter (for example `"Slices of Pizza"`).
+- Switch between dark and light mode in Settings. The public leaderboard has its own switch too.
+- The banner reads schedule entries in `HH:MM` format as a daily timetable, using each viewer's local clock. It counts down to the next entry; entries in other formats are omitted from the banner.
+- Score edits appear in the round-entry table immediately, while calculated totals, rankings and leader announcements wait until two minutes after the last changed score. The pending period is retained across server restarts.
 
 Source code: https://github.com/jemandX/ULan
 
 ## Quick start (6 steps)
 
 1. **Create a folder**, e.g. `C:\ULan`, and copy the whole project into it
-   (`server.py`, `start.bat`, `test_audio.py`, and the folders `static`, `sounds`, `private_data`).
+   (`server.py`, `start.bat`, `set_console_icon.ps1`, `test_audio.py`, and the folders `static`, `sounds`, `private_data`). Put your `icon.ico` beside `start.bat` if you want it shown in the classic Command Prompt window; without it, startup is unchanged.
 2. **Install Python 3** (python.org, tick "Add python.exe to PATH"). No extra packages are needed.
 3. **Test the audio first:** run `python test_audio.py` in the folder. You should hear a sound, a name
    announcement, a leader announcement and an English announcement.
-4. **Double-click `start.bat`.** On the first start Windows Firewall asks for permission: choose "Allow access"
+4. **Double-click `start.bat` and approve the UAC administrator prompt to start ULan.** Windows identifies batch-file elevation as Windows Command Processor in the UAC dialog; after approval, the single server window is titled `ULan (Administrator)`. The launcher closes its initial window when it requests elevation. On the first start Windows Firewall may ask for permission: choose "Allow access"
    (private network). The window shows the addresses, e.g. `http://localhost:8080` and `http://192.168.x.x:8080`.
 5. **Open it in the browser** (host: localhost, players: the LAN address) and **register the first account**.
    It automatically becomes admin. Then open the "Admin" tab, click "As player" for each account if you like,
    and add rounds on the "Scores" tab.
 6. **Upload a sound and test it:** "Settings" tab → upload a sound → choose sound and mode → Save →
-   "Test (on host PC)". Admins also get "Test leader announcement" there.
+   "Test (on host PC)". Admins also get "Test leader announcement" there. Keep the server window open while ULan is in use; press `Ctrl+C` in that window to stop the server.
 
 ## Troubleshooting
 
@@ -69,8 +77,8 @@ If you want people **outside your LAN** to see it, forward **only the leaderboar
 
 ## How it works
 
-- **Roles:** the first registered account is admin. Admins can manage players, rounds, schedule, info text, sounds and
-  accounts (make admins, delete users). Normal users can only change points and hotdogs. This is enforced on the server.
+- **Roles:** the first registered account is admin. Admins manage players, rounds, schedules, shared info, sounds, leave phrases, and any player's presence.
+  Admins can also manage accounts (promote or demote admins, delete users) and test leader announcements. Regular users can edit scores and counter values, manage their own profile and announcement settings, upload sounds, test their own arrival announcement, and set their own presence. This is enforced on the server.
 - **Arrival announcement:** played when a new account registers (including the very first one) and, if
   `ANNOUNCE_ON_LOGIN = True`, on login. Not on page reload, logout or normal page views.
 - **Leader announcement:** played when a *different* player takes first place. The leader is the player with the strictly
@@ -89,6 +97,8 @@ If you want people **outside your LAN** to see it, forward **only the leaderboar
 | Constant | Meaning |
 |---|---|
 | `PORT` | Web server port (default 8080) |
+| `COUNTER_ITEM` | Label shown for the configurable party counter (default `Hotdogs`) |
+| `SCORE_GRACE_SECONDS` | Delay before recalculating totals and rankings after score edits (default 120 seconds) |
 | `MAX_SOUND_SIZE` | Maximum upload size in bytes (default 10 MB) |
 | `ANNOUNCE_ON_LOGIN` | Announce on login, not only on registration |
 | `ANNOUNCE_LEADER` | Announce when someone takes first place |
@@ -100,7 +110,7 @@ If you want people **outside your LAN** to see it, forward **only the leaderboar
 
 ## Data and security
 
-- Data lives in `private_data/` (`users.json`, `state.json`, `sessions.json`) and is never served over HTTP.
+- Data lives in `private_data/` (`users.json`, `state.json`, `sessions.json`) and is never served over HTTP. There is no project-level `.gitignore`, so these runtime files are not excluded by the repository's ignore rules; exclude them before committing. If those files are absent, the server creates them as needed; that copy starts without accounts, sessions, schedule, scores or info.
   To reset everything, stop the server and delete the files there (the next account becomes admin again).
 - Passwords are hashed with scrypt and a salt. Sessions use random tokens in an HttpOnly, SameSite=Strict cookie and
   survive a server restart. There is a rate limit against password guessing.

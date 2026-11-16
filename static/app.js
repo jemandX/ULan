@@ -69,7 +69,10 @@ const I18N = {
     admin_suffix: ' (Admin)', conn_lost: '⚠ keine Verbindung', unreachable: 'Server nicht erreichbar. Läuft der Server noch?',
     tab_scores: 'Punkte', tab_hotdogs: 'Hotdogs', tab_schedule: 'Zeitplan', tab_info: 'Info',
     tab_players: 'Spieler & Steam', tab_settings: 'Einstellungen', tab_admin: 'Admin', tab_about: 'Über',
-    about_title: 'Über ULan', about_text: 'ULan ist ein lokales Intranet für LAN-Partys: Punktestand, Zeitplan, Hotdog-Zähler, Infos und Ansagen am Host-PC. Der Quellcode liegt auf GitHub.', github_link: 'ULan auf GitHub ↗',
+    switch_to_light: 'Hellmodus einschalten', switch_to_dark: 'Dunkelmodus einschalten', theme_mode: 'Darstellung', dark_mode: 'Dunkel', light_mode: 'Hell',
+    event_now: 'Aktuelles Event: {0}', event_next: 'Als Nächstes: {0}', event_ends: 'Endet in {0}', event_starts: 'Startet in {0}',
+    score_grace_notice: 'Neue Rangliste in {0} (Eingabepause nach Punkteänderungen).',
+    about_title: 'Über ULan', about_text: 'ULan ist ein lokales Intranet für LAN-Partys: Punktestand, Zeitplan, Zähler, Infos und Ansagen am Host-PC. Der Quellcode liegt auf GitHub.', github_link: 'ULan auf GitHub ↗',
     add: 'Hinzufügen', del: 'Löschen', save: 'Speichern',
     ranking: 'Rangliste', no_players_admin: 'Noch keine Spieler. Ein Admin legt sie unten an.', player: 'Spieler', sum: 'Summe',
     delete_round_title: 'Runde löschen', delete_round_aria: 'Runde {0} löschen', confirm_round: 'Runde "{0}" samt Punkten löschen?',
@@ -78,8 +81,8 @@ const I18N = {
     no_rounds: 'Noch keine Runden. Ein Admin legt sie unten an.',
     leader_hint: 'Der Führende (★) hat die strikt höchste Summe über 0. Bei Gleichstand an der Spitze wird niemand hervorgehoben.',
     add_player: 'Spieler hinzufügen', add_round: 'Runde hinzufügen', player_name_ph: 'Name des Spielers', round_name_ph: 'Name der Runde',
-    hotdog_title: 'Hotdog-Zähler 🌭', hotdog_total: 'Insgesamt gegessen: ', less_aria: 'Ein Hotdog weniger für {0}',
-    more_aria: 'Ein Hotdog mehr für {0}', no_players_short: 'Noch keine Spieler.',
+    hotdog_title: 'Zähler: {0}', hotdog_total: 'Insgesamt gezählt: ', less_aria: 'Weniger {0} für {1}',
+    more_aria: 'Mehr {0} für {1}', no_players_short: 'Noch keine Spieler.',
     schedule_title: 'Zeitplan', time_ph: 'Uhrzeit, z. B. 18:00', what_ph: 'Was passiert?', time_aria: 'Uhrzeit', title_aria: 'Titel',
     delete_entry_aria: 'Eintrag löschen', no_entries: 'Noch keine Einträge.', need_time_title: 'Uhrzeit und Titel angeben.',
     add_entry: 'Eintrag hinzufügen',
@@ -110,7 +113,10 @@ const I18N = {
     admin_suffix: ' (admin)', conn_lost: '⚠ no connection', unreachable: 'Server not reachable. Is the server still running?',
     tab_scores: 'Scores', tab_hotdogs: 'Hotdogs', tab_schedule: 'Schedule', tab_info: 'Info',
     tab_players: 'Players & Steam', tab_settings: 'Settings', tab_admin: 'Admin', tab_about: 'About',
-    about_title: 'About ULan', about_text: 'ULan is a local intranet for LAN parties: scoreboard, schedule, hotdog counter, info and announcements on the host PC. The source code is on GitHub.', github_link: 'ULan on GitHub ↗',
+    switch_to_light: 'Switch to light mode', switch_to_dark: 'Switch to dark mode', theme_mode: 'Appearance', dark_mode: 'Dark', light_mode: 'Light',
+    event_now: 'Current event: {0}', event_next: 'Up next: {0}', event_ends: 'Ends in {0}', event_starts: 'Starts in {0}',
+    score_grace_notice: 'Leaderboard updates in {0} (grace period after score changes).',
+    about_title: 'About ULan', about_text: 'ULan is a local intranet for LAN parties: scoreboard, schedule, a configurable counter, info and announcements on the host PC. The source code is on GitHub.', github_link: 'ULan on GitHub ↗',
     add: 'Add', del: 'Delete', save: 'Save',
     ranking: 'Ranking', no_players_admin: 'No players yet. An admin adds them below.', player: 'Player', sum: 'Total',
     delete_round_title: 'Delete round', delete_round_aria: 'Delete round {0}', confirm_round: 'Delete round "{0}" including its points?',
@@ -119,8 +125,8 @@ const I18N = {
     no_rounds: 'No rounds yet. An admin adds them below.',
     leader_hint: 'The leader (★) has the strictly highest total above 0. If the top is tied, nobody is highlighted.',
     add_player: 'Add player', add_round: 'Add round', player_name_ph: 'Player name', round_name_ph: 'Round name',
-    hotdog_title: 'Hotdog counter 🌭', hotdog_total: 'Eaten in total: ', less_aria: 'One hotdog less for {0}',
-    more_aria: 'One hotdog more for {0}', no_players_short: 'No players yet.',
+    hotdog_title: 'Counter: {0}', hotdog_total: 'Counted in total: ', less_aria: 'One less {0} for {1}',
+    more_aria: 'One more {0} for {1}', no_players_short: 'No players yet.',
     schedule_title: 'Schedule', time_ph: 'Time, e.g. 18:00', what_ph: "What's happening?", time_aria: 'Time', title_aria: 'Title',
     delete_entry_aria: 'Delete entry', no_entries: 'No entries yet.', need_time_title: 'Please enter a time and a title.',
     add_entry: 'Add entry',
@@ -165,6 +171,25 @@ function applyStaticI18n() {
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
   document.querySelectorAll('[data-lang]').forEach((b) => b.classList.toggle('active', b.dataset.lang === lang));
+  applyTheme();
+}
+
+function readTheme() {
+  try { return localStorage.getItem('theme') === 'light' ? 'light' : 'dark'; } catch (e) { return 'dark'; }
+}
+
+let theme = readTheme();
+
+function applyTheme() {
+  document.documentElement.dataset.theme = theme;
+  const selector = $('#themeSelect');
+  if (selector) selector.value = theme;
+}
+
+function setTheme(value) {
+  theme = value === 'light' ? 'light' : 'dark';
+  try { localStorage.setItem('theme', theme); } catch (e) { /* ignoriert */ }
+  applyTheme();
 }
 
 function adoptLang(l) {
@@ -237,6 +262,7 @@ function showAuth() {
   state = null;
   me = null;
   $('#app').hidden = true;
+  $('#eventBanner').hidden = true;
   $('#auth').hidden = false;
 }
 
@@ -311,17 +337,20 @@ function render() {
   const list = TABS.filter(([id]) => id !== 'admin' || me.is_admin);
   if (!list.some(([id]) => id === tab)) tab = 'scores';
   tabs.replaceChildren(...list.map(([id, label]) =>
-    h('button', { type: 'button', class: id === tab ? 'active' : '', onclick: () => { tab = id; render(); } }, t(label))));
+    h('button', { type: 'button', class: id === tab ? 'active' : '', onclick: () => { tab = id; render(); } }, id === 'hotdogs' ? (state.counter_item || 'Hotdogs') : t(label))));
   const fn = { scores: renderScores, hotdogs: renderHotdogs, schedule: renderSchedule, info: renderInfo,
                players: renderPlayers, settings: renderSettings, admin: renderAdmin, about: renderAbout }[tab];
   $('#view').replaceChildren(fn());
+  updateEventBanner();
+  updateScoreNotice();
 }
 
 function totalsOf() {
+  const scores = state.calculated_scores || state.scores;
   const t = {};
   for (const p of state.players) {
     let sum = 0;
-    for (const r of state.rounds) sum += ((state.scores[p.id] || {})[r.id]) || 0;
+    for (const r of state.rounds) sum += ((scores[p.id] || {})[r.id]) || 0;
     t[p.id] = sum;
   }
   return t;
@@ -337,6 +366,56 @@ function askText(label, payloadFn) {
   };
   input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); go(); } });
   return h('div', { class: 'row' }, input, h('button', { type: 'button', onclick: go }, t('add')));
+}
+
+function formatCountdown(milliseconds) {
+  const seconds = Math.max(0, Math.ceil(milliseconds / 1000));
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const rest = seconds % 60;
+  return (days ? days + 'd ' : '') + String(hours).padStart(2, '0') + ':' +
+    String(minutes).padStart(2, '0') + ':' + String(rest).padStart(2, '0');
+}
+
+function updateEventBanner() {
+  const banner = $('#eventBanner');
+  if (!banner || !state || !me) { if (banner) banner.hidden = true; return; }
+  const events = (state.schedule || []).map((entry) => {
+    const match = String(entry.time || '').trim().match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+    return match ? { title: entry.title, hour: Number(match[1]), minute: Number(match[2]) } : null;
+  }).filter(Boolean).sort((a, b) => a.hour * 60 + a.minute - (b.hour * 60 + b.minute));
+  if (!events.length) { banner.hidden = true; return; }
+  const now = new Date();
+  const today = events.map((event) => Object.assign({}, event, {
+    at: new Date(now.getFullYear(), now.getMonth(), now.getDate(), event.hour, event.minute),
+  }));
+  const past = today.filter((event) => event.at <= now);
+  const upcoming = today.filter((event) => event.at > now);
+  let title;
+  let countdown;
+  if (past.length && upcoming.length) {
+    title = t('event_now', past[past.length - 1].title);
+    countdown = t('event_ends', formatCountdown(upcoming[0].at - now));
+  } else if (upcoming.length) {
+    title = t('event_next', upcoming[0].title);
+    countdown = t('event_starts', formatCountdown(upcoming[0].at - now));
+  } else {
+    title = t('event_now', past[past.length - 1].title);
+    const first = today[0];
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, first.hour, first.minute);
+    countdown = t('event_ends', formatCountdown(tomorrow - now));
+  }
+  banner.replaceChildren(h('strong', null, title), h('span', null, countdown));
+  banner.hidden = false;
+}
+
+function updateScoreNotice() {
+  const notice = $('#scorePendingNotice');
+  if (!notice || !state) return;
+  const remaining = Number(state.score_pending_until || 0) * 1000 - Date.now();
+  notice.hidden = remaining <= 0;
+  if (remaining > 0) notice.textContent = t('score_grace_notice', formatCountdown(remaining));
 }
 
 function renderScores() {
@@ -383,6 +462,7 @@ function renderScores() {
       : h('p', { class: 'hint' }, t('no_players')),
     st.players.length && !st.rounds.length ? h('p', { class: 'hint' }, t('no_rounds')) : null,
     h('p', { class: 'hint' }, t('leader_hint')),
+    h('p', { class: 'hint score-pending', id: 'scorePendingNotice', hidden: true }),
     st.leaderboard_port ? h('p', { class: 'hint' }, t('lb_link'),
       h('a', { href: location.protocol + '//' + location.hostname + ':' + st.leaderboard_port + '/', target: '_blank', rel: 'noopener noreferrer' },
         location.hostname + ':' + st.leaderboard_port)) : null));
@@ -402,10 +482,10 @@ function renderHotdogs() {
   for (const p of st.players) sum += st.hotdogs[p.id] || 0;
   const items = st.players.map((p) => h('li', null,
     h('span', { class: 'grow' }, p.name),
-    h('button', { type: 'button', 'aria-label': t('less_aria', p.name), onclick: () => act({ action: 'hotdog_add', player: p.id, delta: -1 }) }, '−'),
+    h('button', { type: 'button', 'aria-label': t('less_aria', st.counter_item || 'Hotdogs', p.name), onclick: () => act({ action: 'hotdog_add', player: p.id, delta: -1 }) }, '−'),
     h('span', { class: 'counter' }, String(st.hotdogs[p.id] || 0)),
-    h('button', { type: 'button', class: 'primary', 'aria-label': t('more_aria', p.name), onclick: () => act({ action: 'hotdog_add', player: p.id, delta: 1 }) }, '+')));
-  return h('div', { class: 'card' }, h('h2', null, t('hotdog_title')),
+    h('button', { type: 'button', class: 'primary', 'aria-label': t('more_aria', st.counter_item || 'Hotdogs', p.name), onclick: () => act({ action: 'hotdog_add', player: p.id, delta: 1 }) }, '+')));
+  return h('div', { class: 'card' }, h('h2', null, t('hotdog_title', st.counter_item || 'Hotdogs')),
     h('p', null, t('hotdog_total'), h('strong', null, String(sum))),
     items.length ? h('ul', { class: 'list' }, items) : h('p', { class: 'hint' }, t('no_players_short')));
 }
@@ -469,6 +549,10 @@ function renderSettings() {
   const d = draft.settings;
   if (d.sound && !st.sounds.includes(d.sound)) d.sound = '';
 
+  const themeSel = h('select', { id: 'themeSelect', 'aria-label': t('theme_mode') },
+    h('option', { value: 'dark' }, t('dark_mode')), h('option', { value: 'light' }, t('light_mode')));
+  themeSel.value = theme;
+  themeSel.addEventListener('change', () => setTheme(themeSel.value));
   const langSel = h('select', { 'aria-label': t('language') },
     h('option', { value: 'de' }, 'Deutsch'), h('option', { value: 'en' }, 'English'));
   langSel.value = lang;
@@ -511,6 +595,7 @@ function renderSettings() {
   };
 
   const settingsCard = h('div', { class: 'card' }, h('h2', null, t('my_settings')),
+    h('label', null, t('theme_mode')), themeSel,
     h('label', null, t('language')), langSel,
     h('label', null, t('steam_handle')), name,
     h('label', null, t('steam_link')), url,
@@ -654,10 +739,12 @@ async function poll() {
 }
 
 async function boot() {
+  applyTheme();
   applyStaticI18n();
   document.querySelectorAll('[data-lang]').forEach((b) => b.addEventListener('click', () => chooseLang(b.dataset.lang)));
   setupAuth();
   $('#awayBtn').addEventListener('click', () => { if (me) act({ action: 'away_set', away: !me.away }); });
+
   const view = $('#view');
   view.addEventListener('focusout', () => setTimeout(flushPending, 200));
   view.addEventListener('pause', () => setTimeout(flushPending, 200), true);
@@ -669,6 +756,7 @@ async function boot() {
     showAuth();
   }
   setInterval(poll, 2000);
+  setInterval(() => { updateEventBanner(); updateScoreNotice(); }, 1000);
 }
 
 boot();

@@ -8,6 +8,8 @@ Start:  python server.py      (oder start.bat doppelklicken)
 
 # ============================ KONFIGURATION ============================
 PORT = 8080                                   # Port des Webservers
+COUNTER_ITEM = "Hotdogs"                      # Name des frei waehlbaren Party-Zaehler-Items
+SCORE_GRACE_SECONDS = 120                     # Wartezeit nach der letzten Punkteingabe
 MAX_SOUND_SIZE = 10 * 1024 * 1024             # maximale Groesse einer Sounddatei in Bytes
 ANNOUNCE_ON_LOGIN = True                      # Ansage auch beim Login (nicht nur bei Registrierung)
 ANNOUNCE_LEADER = True                        # Ansage bei Wechsel auf Platz 1
@@ -88,6 +90,8 @@ STEAM_URL_RE = re.compile(
 )
 
 LOCK = threading.RLock()
+SCORE_WAKE = threading.Event()
+SCORE_PENDING_DEADLINE = None
 USERS = {}      # id -> dict
 SESSIONS = {}   # sha256(token) -> {"uid":..., "exp":...}
 STATE = {}
@@ -280,7 +284,7 @@ def bump():
 
 
 def load_all():
-    global STATE
+    global STATE, SCORE_PENDING_DEADLINE
     users = load_json(USERS_FILE, {"users": []})
     for u in users.get("users", []):
         USERS[u["id"]] = u
@@ -294,6 +298,16 @@ def load_all():
     STATE.setdefault("players", [])
     STATE.setdefault("rounds", [])
     STATE.setdefault("scores", {})
+    STATE.setdefault("calculated_scores", {pid: dict(cell) for pid, cell in STATE["scores"].items()})
+    STATE.setdefault("score_pending_until", 0)
+    remaining = float(STATE["score_pending_until"] or 0) - time.time()
+    if remaining > 0:
+        SCORE_PENDING_DEADLINE = time.monotonic() + remaining
+        SCORE_WAKE.set()
+    else:
+        STATE["calculated_scores"] = {pid: dict(cell) for pid, cell in STATE["scores"].items()}
+        STATE["score_pending_until"] = 0
+        SCORE_PENDING_DEADLINE = None
     STATE.setdefault("hotdogs", {})
     STATE.setdefault("schedule", [])
     STATE.setdefault("info", "")
@@ -660,7 +674,7 @@ def totals():
     round_ids = {r["id"] for r in STATE["rounds"]}
     res = {}
     for p in STATE["players"]:
-        s = STATE["scores"].get(p["id"], {})
+        s = STATE.get("calculated_scores", STATE["scores"]).get(p["id"], {})
         res[p["id"]] = sum(v for rid, v in s.items() if rid in round_ids)
     return res
 
@@ -743,14 +757,20 @@ def to_int(v, lo, hi, label):
 
 
 def act_score_set(d):
+    global SCORE_PENDING_DEADLINE
     need_player(d.get("player"))
     need_round(d.get("round"))
     v = d.get("value")
     cell = STATE["scores"].setdefault(d["player"], {})
+    old_value = cell.get(d["round"])
     if v is None or v == "":
         cell.pop(d["round"], None)
     else:
         cell[d["round"]] = to_int(v, -1000000, 1000000, "Punkte")
+    if old_value != cell.get(d["round"]):
+        STATE["score_pending_until"] = time.time() + SCORE_GRACE_SECONDS
+        SCORE_PENDING_DEADLINE = time.monotonic() + SCORE_GRACE_SECONDS
+        SCORE_WAKE.set()
 
 
 def act_hotdog_add(d):
@@ -902,8 +922,30 @@ def do_action(user, d):
         raise ApiError(403, "Das darf nur ein Admin.")
     with LOCK:
         ACTIONS[act](d)
-        leader_check()
+        if act != "score_set":
+            leader_check()
         bump()
+
+
+def score_worker():
+    global SCORE_PENDING_DEADLINE
+    while True:
+        with LOCK:
+            if SCORE_PENDING_DEADLINE is None:
+                wait_for = None
+                due = False
+            else:
+                wait_for = max(0.0, SCORE_PENDING_DEADLINE - time.monotonic())
+                due = wait_for == 0
+            SCORE_WAKE.clear()
+            if due:
+                STATE["calculated_scores"] = {pid: dict(cell) for pid, cell in STATE["scores"].items()}
+                STATE["score_pending_until"] = 0
+                SCORE_PENDING_DEADLINE = None
+                leader_check()
+                bump()
+                continue
+        SCORE_WAKE.wait(wait_for)
 
 
 def state_json(user):
@@ -916,8 +958,11 @@ def state_json(user):
             "players": [dict(p, away=p["name"].casefold() in away) for p in STATE["players"]],
             "rounds": STATE["rounds"],
             "scores": STATE["scores"],
+            "calculated_scores": STATE.get("calculated_scores", STATE["scores"]),
+            "score_pending_until": STATE.get("score_pending_until", 0),
             "hotdogs": STATE["hotdogs"],
             "schedule": STATE["schedule"],
+            "counter_item": COUNTER_ITEM,
             "info": STATE["info"],
             "top": top_player_id(),
             "leaderboard_port": LEADERBOARD_PORT if PUBLIC["running"] else 0,
@@ -1576,6 +1621,7 @@ def main():
         sys.exit(1)
     load_all()
     leader_check(initial=True)
+    threading.Thread(target=score_worker, daemon=True).start()
     threading.Thread(target=audio_worker, daemon=True).start()
     try:
         server = Server(("0.0.0.0", PORT), Handler)

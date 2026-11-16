@@ -1,0 +1,21 @@
+{
+  "revision": 2,
+  "brief": {
+    "question": "Can the ULan launcher set its Windows command window icon from a project-root icon.ico without disrupting the server startup?",
+    "purpose": "Make the command window used to run ULan display the user's custom icon.",
+    "targets": [
+      "C:\\Users\\Mats\\Documents\\ULan-dev\\ULan"
+    ],
+    "constraints": [
+      "Only edit project files in place.",
+      "Use the icon file named icon.ico supplied by the user; do not create or replace it.",
+      "Preserve the server launch behavior and existing data."
+    ],
+    "done_when": "The Windows launch console attempts to use the adjacent icon.ico when present, while continuing to launch normally if it is absent or unsupported; check the result with rebuild_check."
+  },
+  "plan": [],
+  "hypotheses": [],
+  "findings": [],
+  "handoff": null,
+  "updated": "2026-11-16T21:41:18Z"
+}

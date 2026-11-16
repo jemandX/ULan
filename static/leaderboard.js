@@ -1,8 +1,8 @@
 'use strict';
 
 const TEXT = {
-  de: { title: 'Rangliste', empty: 'Noch keine Spieler oder Punkte.', conn: '⚠ keine Verbindung', away: 'abwesend', absent: 'Nicht anwesend: ' },
-  en: { title: 'Leaderboard', empty: 'No players or points yet.', conn: '⚠ no connection', away: 'away', absent: 'Not present: ' },
+  de: { title: 'Rangliste', empty: 'Noch keine Spieler oder Punkte.', conn: '⚠ keine Verbindung', away: 'abwesend', absent: 'Nicht anwesend: ', switchLight: 'Hellmodus einschalten', switchDark: 'Dunkelmodus einschalten' },
+  en: { title: 'Leaderboard', empty: 'No players or points yet.', conn: '⚠ no connection', away: 'away', absent: 'Not present: ', switchLight: 'Switch to light mode', switchDark: 'Switch to dark mode' },
 };
 
 function startLang() {
@@ -15,12 +15,22 @@ function startLang() {
 
 let lang = startLang();
 let rows = [];
+let theme = 'dark';
+try { theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark'; } catch (e) { /* Speicher nicht verfügbar */ }
+
+function applyTheme() {
+  document.documentElement.dataset.theme = theme;
+  const button = document.getElementById('themeBtn');
+  button.textContent = theme === 'dark' ? TEXT[lang].switchLight : TEXT[lang].switchDark;
+}
+
 
 function applyLang() {
   document.documentElement.lang = lang;
   document.getElementById('lbTitle').textContent = TEXT[lang].title;
   document.getElementById('lbEmpty').textContent = TEXT[lang].empty;
   document.querySelectorAll('[data-lang]').forEach((b) => b.classList.toggle('active', b.dataset.lang === lang));
+  applyTheme();
 }
 
 function render() {
@@ -77,4 +87,10 @@ document.querySelectorAll('[data-lang]').forEach((b) => b.addEventListener('clic
 
 applyLang();
 load();
+document.getElementById('themeBtn').addEventListener('click', () => {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('theme', theme); } catch (e) { /* ignoriert */ }
+  applyTheme();
+});
+
 setInterval(() => { if (!document.hidden) load(); }, 3000);
